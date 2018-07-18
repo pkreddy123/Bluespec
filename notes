@@ -1,0 +1,31 @@
+MAC.bsv: Useless
+
+MULT_wrapper: As we are using verilog multifinal files which mapas multiplications to DSP blocks we use this wrapper
+	
+multfinal:Verilog files that is used for multiplication
+
+BRAM:Code to use BRam
+
+for using while static values should be used
+Otherwise there will a pblm as the loop does not terminate
+Stacksize error
+
+Hardware  design considerations:
+	
+	The circuit should work such that even if the host stops sending the data,the circuit should not stall.
+
+	There should reset option .Once the image data is processed , The fpga should reset such that in can process the new data again.
+
+	The Architecture should be designed with modular circuits.It should not be monolithic(Single design).Each and every module should be checked for all thetest cases.
+
+	 Bram should be used for memory storage.Wrapper should be better to use so that an friendly interface can be created to interact.
+
+	The testbench should be made to behave exactly as the host.All design constraints should be checked using testbench otherwise your code might not work exactly on fpga.
+
+	Larger size FIFO should be design using BRam .Small FIFOS can be made using registers.
+
+	Rather than storing the whole data on fpga better to use streaming of data.
+
+	FPGA has three important components.DSP blocks,CLB blocks and BRam memory cells.
+
+	Better to use FIFOs as buffers. 

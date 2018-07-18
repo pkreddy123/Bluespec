@@ -1,0 +1,29 @@
+DRAM read requests are split phase transactions. For a read operation, you will need a separate FSM to
+dequeue the memory read response and process the data.
+
+You are not required to pre-allocate buffering for DRAM read response data to prevent deadlock, as this is already provided for you in the
+Role to SimpleRole interface conversion logic.
+
+SimpleDram.sv: DRAM wrapper for SimpleRole, instantiated within Role.sv. Do not modify this file.
+
+The full 32 bits of addressing is required for addressing all 4GB of each DRAM channel, but addresses must be 64B (512-bit) aligned.
+
+There are several optimizations that can be made to user logic to significantly improve DRAM
+throughput and thus overall performance. We leave this as an open exercise for beginners as a simple
+first project.
+
+To utilize
+both channels of memory, we included a simple DramInterleaver module, which has the capability of
+sending all memory requests to channel 0 (default), sending all memory requests to channel 1, or
+interleaving requests across both memory channels.
+
+This configurability is provided via the SoftReg
+interface: software can write to the proper soft register number to change the DramInterleaver
+configuration. Users should only change the DramInterleaver configuration at the start of the program
+to avoid memory address space issues.
+
+Note that the provided DramInterleaver module only has a single input port. To fully saturate both
+channels of memory, you need to design a dual-ported DramInterleaver module, which is currently not
+provided. We hope to increase the number of provided library components in the future to further
+improve ease of development.
+
