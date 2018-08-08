@@ -1,6 +1,7 @@
 package Division4;
 import Vector::*;
 import FIFO::*;
+import pulse::*;
 import FIFOF::*;
 
 
@@ -22,7 +23,9 @@ module mkDivision4(Div);
                 Reg#(Bit#(16)) q[n+2];
                 Reg#(int)      stage[n+2];
 		Reg#(Int#(32)) divisor <- mkReg(0);
-		
+		Reg#(Int#(16)) ans1 <- mkRegU;
+		Reg#(Int#(16)) ans2 <- mkRegU;
+		Pulse p <- mkPulse;
 		for(Integer i =0;i<n+2;i = i+1) begin
 			rem[i]   <- mkReg(0);
 			div[i]   <- mkReg(0);
@@ -45,25 +48,23 @@ module mkDivision4(Div);
 		rule noinput ( !inq.notEmpty);
 			stage[0] <= 0;
 		endrule
+
 		for(Integer i = 0; i < 16 ; i=i+1) begin
          
-		       rule stage1;
-			Int#(32) tmp = rem[i] - div[i];
-			if(tmp >= 0)  	begin
-				rem[i+1] <= tmp;
+		       rule stage1(rem[i] - div[i] >= 0);
+				rem[i+1] <= rem[i] - div[i];
 				q[i+1]   <= ((q[i] << 1) | 1);
-			end
-			
-			else begin
+		       endrule
+	   		
+			rule intr1(rem[i] - div[i] < 0);
 				q[i+1] <= (q[i] << 1);
 				rem[i+1] <= rem[i];
-			end
+			endrule		
 			
+			rule cont;
 			div[i+1] <= (div[i] >> 1);
 			stage[i+1] <= stage[i];
-                	
-		endrule
-		
+                	endrule
 		end
 
 		
@@ -82,15 +83,18 @@ module mkDivision4(Div);
                          end
 				das[0] = unpack(qou);
 				das[1] = truncate(remainder);
-				
-			outq.enq(das);
-                        stage[17] <= 1;
-			
-		endrule
+				ans1 <= das[0];
+				ans2 <= das[1];
+				p.send;
+		endrule		
+
 	
 		
                 method ActionValue#(Vector#(2,Int#(16))) get;
-                      let das = outq.first;outq.deq;
+			p.ishigh;
+                       Vector#(2,Int#(16)) das = newVector;
+			das[0] = ans1;
+                        das[1] = ans2;
                         return das;
                 endmethod
 
